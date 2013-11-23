@@ -1,0 +1,480 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"class",
+				"classmethod"
+			],
+			[
+				"rx",
+				"rxPacket"
+			],
+			[
+				"toggle",
+				"toggleCallback"
+			],
+			[
+				"toggl",
+				"toggleCallback"
+			],
+			[
+				"devices",
+				"devicesModel"
+			],
+			[
+				"Mesh",
+				"MeshDevice"
+			],
+			[
+				"MAP",
+				"MAP_SIZE"
+			],
+			[
+				"righ",
+				"rightData"
+			],
+			[
+				"inac",
+				"inactivePalette"
+			],
+			[
+				"resize",
+				"resizeCorrection"
+			],
+			[
+				"timeSpee",
+				"timeSpeedSlider"
+			],
+			[
+				"moveSp",
+				"moveSpeedSlider"
+			],
+			[
+				"cah",
+				"cacheRow"
+			],
+			[
+				"col",
+				"columns"
+			],
+			[
+				"tick",
+				"ticksToSkip"
+			],
+			[
+				"skip",
+				"skippingTo"
+			],
+			[
+				"ski",
+				"skippingTo"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "Mesh.ui",
+			"settings":
+			{
+				"buffer_size": 23050,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "MeshDevice.py",
+			"settings":
+			{
+				"buffer_size": 6392,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "MeshView.py",
+			"settings":
+			{
+				"buffer_size": 11303,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Mesh.py",
+			"settings":
+			{
+				"buffer_size": 9444,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/vmz/Dropbox/Ostranna/Mesh/MeshDevice.py",
+		"/home/vmz/Dropbox/Ostranna/Mesh/Mesh.py",
+		"/home/vmz/Dropbox/Ostranna/Mesh/Test.py",
+		"/home/vmz/Dropbox/Ostranna/Mesh/Mesh.sublime-project",
+		"/home/vmz/.config/sublime-text-2/Packages/User/Preferences.sublime-settings",
+		"/usr/share/applications/sublime.desktop",
+		"/usr/share/applications/defaults.list"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"TICKS_IN_PACKET",
+			"relation",
+			"todo",
+			"getSpeed",
+			"parent",
+			"slider",
+			"moveSpeedSlider",
+			"\n",
+			"        print \nmoveSpeedSlider",
+			" is ",
+			"columnwidth",
+			".relation",
+			"effectiveGauss",
+			"==",
+			"inspect_shell",
+			"self.devices",
+			"devices",
+			"relation",
+			"__init",
+			"self.devicesTableView",
+			"self.devicesModel",
+			"self.devices",
+			"= ",
+			"#",
+			"todo",
+			"COLUMNS_DATA",
+			"WINDOW_POSITION",
+			"MAX_SPEED",
+			"FASTEST_GOER",
+			"HEARING_CONSTANT",
+			"TIME_LOGS",
+			"TIME_ASPECTS",
+			"TIME_LOGS",
+			"timeformat",
+			"timeFormat",
+			"columnsMenu",
+			"ColumnAction",
+			"qmodelindex",
+			".get",
+			".set",
+			"cache",
+			"cell.",
+			".headers",
+			"MAP_SIZE",
+			"RAW_ROLE",
+			"\n",
+			"INVALID_INDEX",
+			"INVALID_INDEX\n\n",
+			"INVALID_INDEX",
+			"INVALID_DATA",
+			"MAP_FIELD\n",
+			"MAP_FIELD",
+			"FONT_METRICS_CORRECTION",
+			"getDeviceSelection",
+			"devicesele",
+			"getDeviceSelection\n\n",
+			".visuals",
+			"RoleDefaultSortProxyModel",
+			"refresh(",
+			"cell(",
+			" or ",
+			"data(",
+			"deactivate",
+			"view",
+			".DEVICE",
+			"relation",
+			"cache[",
+			"column",
+			"COLUMNS_DATA",
+			"headers",
+			"columns =",
+			"todo",
+			"umn(",
+			"setColumnHidden",
+			"setColumnHidden\n\n\n",
+			"device",
+			"view",
+			"visual",
+			"device",
+			"recurs",
+			"set(",
+			"sort_",
+			"SORT_ROLE",
+			"_role",
+			"cachec",
+			"cachecell",
+			"view",
+			"selection",
+			"fontMetrics",
+			"bold",
+			"QModelIndex",
+			"QVariant",
+			"QLabel",
+			"QFrame",
+			"QPalette",
+			"QStyle",
+			"QCursor",
+			"QApplication",
+			"QTimer",
+			"QString",
+			"QString\n\n\n",
+			"COLUMNS_DATA\n",
+			"metrics",
+			"headers",
+			"DEVICE_MARK",
+			"MAP_FIELD",
+			"MoveSpeedSlider",
+			"MoveSpeedSlider\n\n",
+			"format_exc",
+			"format_exc\n\n",
+			"TICKS_IN_SLOT",
+			"TICKS_IN_SLOT\n",
+			"\n",
+			"TICKS_IN_SLOT\n\n",
+			"model(",
+			"columnsData",
+			"NUM_DEVICES",
+			"QIntValidator",
+			"QCursor",
+			"#",
+			"setSelectionBehavior",
+			"#",
+			"#\n\n\n\n\n#",
+			"#",
+			"QCursor",
+			"()\n",
+			"sample",
+			"changed"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "Mesh.ui",
+					"settings":
+					{
+						"buffer_size": 23050,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/XML/XML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 51.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "MeshDevice.py",
+					"settings":
+					{
+						"buffer_size": 6392,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4278,
+								4278
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1838.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "MeshView.py",
+					"settings":
+					{
+						"buffer_size": 11303,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3642,
+								3642
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2246.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "Mesh.py",
+					"settings":
+					{
+						"buffer_size": 9444,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8595,
+								8595
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3232.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}

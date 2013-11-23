@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>702</width>
+    <height>387</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Mesh Simulation</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
+  </property>
+  <widget class="QWidget" name="mainWidget">
+   <layout class="QHBoxLayout" name="mainLayout" stretch="0,1">
+    <property name="spacing">
+     <number>10</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" name="leftLayout">
+      <item>
+       <layout class="QHBoxLayout" name="controlLayout">
+        <item>
+         <widget class="SeedLineEdit" name="seedEdit">
+          <property name="toolTip">
+           <string>Random seed</string>
+          </property>
+          <property name="statusTip">
+           <string>Random seed</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight</set>
+          </property>
+          <property name="placeholderText">
+           <string>random</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ResetButton" name="resetButton">
+          <property name="toolTip">
+           <string>Reset mesh</string>
+          </property>
+          <property name="statusTip">
+           <string>Reset mesh</string>
+          </property>
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="playButton">
+          <property name="toolTip">
+           <string>Play</string>
+          </property>
+          <property name="statusTip">
+           <string>Play</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/play.png</normaloff>images/play.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pauseButton">
+          <property name="toolTip">
+           <string>Pause</string>
+          </property>
+          <property name="statusTip">
+           <string>Pause</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/pause.png</normaloff>images/pause.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="skipTickButton">
+          <property name="toolTip">
+           <string>Skip a tick</string>
+          </property>
+          <property name="statusTip">
+           <string>Skip a tick</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/skipTick.png</normaloff>images/skipTick.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="skipSlotButton">
+          <property name="toolTip">
+           <string>Skip a slot</string>
+          </property>
+          <property name="statusTip">
+           <string>Skip a slot</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/skipSlot.png</normaloff>images/skipSlot.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="skipCycleButton">
+          <property name="toolTip">
+           <string>Skip a cycle</string>
+          </property>
+          <property name="statusTip">
+           <string>Skip a cycle</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/skipCycle.png</normaloff>images/skipCycle.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="skipSuperCycleButton">
+          <property name="toolTip">
+           <string>Skip a supercycle</string>
+          </property>
+          <property name="statusTip">
+           <string>Skip a supercycle</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/skipSupercycle.png</normaloff>images/skipSupercycle.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="skipMinuteButton">
+          <property name="toolTip">
+           <string>Skip a minute</string>
+          </property>
+          <property name="statusTip">
+           <string>Skip a minute</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/skipMinute.png</normaloff>images/skipMinute.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="skipHourButton">
+          <property name="toolTip">
+           <string>Skip an hour</string>
+          </property>
+          <property name="statusTip">
+           <string>Skip an hour</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/skipHour.png</normaloff>images/skipHour.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="skipDayButton">
+          <property name="toolTip">
+           <string>Skip a day</string>
+          </property>
+          <property name="statusTip">
+           <string>Skip a day</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>images/skipDay.png</normaloff>images/skipDay.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="rwsCheckBox">
+          <property name="toolTip">
+           <string>Redraw while skipping</string>
+          </property>
+          <property name="statusTip">
+           <string>Redraw while skipping</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>RwS</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="speedLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="timeSpeedLable">
+          <property name="text">
+           <string>Time speed</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="moveSpeedLabel">
+          <property name="text">
+           <string>Move speed</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="timeSpeedValueLabel">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Time speed</string>
+          </property>
+          <property name="statusTip">
+           <string>Time speed</string>
+          </property>
+          <property name="text">
+           <string>1/64</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="moveSpeedValueLabel">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Device move speed</string>
+          </property>
+          <property name="statusTip">
+           <string>Device move speed</string>
+          </property>
+          <property name="text">
+           <string>128</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="TimeSpeedSlider" name="timeSpeedSlider">
+          <property name="toolTip">
+           <string>Time speed adjustment</string>
+          </property>
+          <property name="statusTip">
+           <string>Time speed adjustment</string>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::TicksBelow</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="MoveSpeedSlider" name="moveSpeedSlider">
+          <property name="toolTip">
+           <string>Device movement speed adjustment</string>
+          </property>
+          <property name="statusTip">
+           <string>Device movement speed adjustment</string>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::TicksBelow</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="valuesLayout" stretch="0,0,1">
+        <item>
+         <widget class="QLabel" name="globalTimeLabel">
+          <property name="text">
+           <string>Global time</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="TimeLabel" name="globalTimeValueLabel">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Global time</string>
+          </property>
+          <property name="statusTip">
+           <string>Global time</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: red</string>
+          </property>
+          <property name="text">
+           <string>1:00:00:00:00.0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="valuesSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="devicesTitleLayout" stretch="0,1">
+        <item>
+         <widget class="QLabel" name="devicesLabel">
+          <property name="text">
+           <string>Devices</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="devicesLine">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="DevicesTableView" name="devicesTableView">
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>210</green>
+              <blue>210</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>210</green>
+              <blue>210</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>51</red>
+              <green>153</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>7</pointsize>
+         </font>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="DevicesMapFrame" name="devicesMapFrame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>100</height>
+       </size>
+      </property>
+      <property name="statusTip">
+       <string>Device map</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: white</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <widget class="QLabel" name="activeDeviceVisualSample">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>25</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: red; background-color: none; border: 1px solid red; border-radius: 5px</string>
+       </property>
+       <property name="text">
+        <string>•88</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="inactiveDeviceVisualSample">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>25</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: none; border: 1px solid none; border-radius: 5px</string>
+       </property>
+       <property name="text">
+        <string>•88</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="deviceTableViewChangedSample">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>41</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Base">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Window">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Base">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Window">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>120</red>
+             <green>120</green>
+             <blue>120</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Base">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Window">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="text">
+        <string>changed</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>702</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="newAction"/>
+    <addaction name="openAction"/>
+    <addaction name="separator"/>
+    <addaction name="saveAction"/>
+    <addaction name="saveAsAction"/>
+    <addaction name="separator"/>
+    <addaction name="quitAction"/>
+   </widget>
+   <widget class="QMenu" name="columnsMenu">
+    <property name="title">
+     <string>Columns</string>
+    </property>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="columnsMenu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="newAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="statusTip">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="saveAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="statusTip">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="saveAsAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save As...</string>
+   </property>
+   <property name="statusTip">
+    <string>Save As...</string>
+   </property>
+  </action>
+  <action name="openAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="statusTip">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="quitAction">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="statusTip">
+    <string>Quit</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TimeSpeedSlider</class>
+   <extends>QSlider</extends>
+   <header>Mesh</header>
+  </customwidget>
+  <customwidget>
+   <class>MoveSpeedSlider</class>
+   <extends>QSlider</extends>
+   <header>Mesh</header>
+  </customwidget>
+  <customwidget>
+   <class>TimeLabel</class>
+   <extends>QLabel</extends>
+   <header>Mesh</header>
+  </customwidget>
+  <customwidget>
+   <class>DevicesTableView</class>
+   <extends>QTableView</extends>
+   <header>MeshView</header>
+  </customwidget>
+  <customwidget>
+   <class>DevicesMapFrame</class>
+   <extends>QFrame</extends>
+   <header>MeshView</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SeedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>Mesh</header>
+  </customwidget>
+  <customwidget>
+   <class>ResetButton</class>
+   <extends>QPushButton</extends>
+   <header>Mesh</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>seedEdit</tabstop>
+  <tabstop>resetButton</tabstop>
+  <tabstop>playButton</tabstop>
+  <tabstop>pauseButton</tabstop>
+  <tabstop>skipTickButton</tabstop>
+  <tabstop>skipSlotButton</tabstop>
+  <tabstop>skipCycleButton</tabstop>
+  <tabstop>skipSuperCycleButton</tabstop>
+  <tabstop>skipMinuteButton</tabstop>
+  <tabstop>skipHourButton</tabstop>
+  <tabstop>skipDayButton</tabstop>
+  <tabstop>rwsCheckBox</tabstop>
+  <tabstop>timeSpeedSlider</tabstop>
+  <tabstop>moveSpeedSlider</tabstop>
+  <tabstop>devicesTableView</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>quitAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

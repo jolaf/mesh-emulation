@@ -1,0 +1,20 @@
+
+ + Make seed sized for 'random'
+
+ + Make Reset sized for title
+
+ * Strange auto-resize on Windows
+
+ + Make icon bolder
+
+ + Tune layout on Linux
+
+ + Resolve the mess of cross-references
+
+ + Enforce incapsulation, avoid classes knowing others structure
+
+ Create reasonable device API
+
+ Resolve strobe effect
+
+ Make it FASTER, use profiler
