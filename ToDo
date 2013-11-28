@@ -13,7 +13,9 @@
 
  + Enforce incapsulation, avoid classes knowing others structure
 
- Create reasonable device API
+ + Fix lint from the notebook
+
+ + Create reasonable device API
 
  Resolve strobe effect
 
