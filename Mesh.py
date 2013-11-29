@@ -3,7 +3,7 @@
 #import inspect_shell
 #
 
-from logging import getLogger, FileHandler, Formatter, StreamHandler, DEBUG, NOTSET
+from logging import getLogger, setLoggerClass, FileHandler, Formatter, StreamHandler, DEBUG
 from random import seed
 from sys import argv
 from time import time
@@ -18,7 +18,7 @@ from PyQt4.QtGui import QPushButton, QDesktopWidget, QLabel, QLineEdit, QMainWin
 
 from MeshDevice import COLUMNS_DATA, START_TIME
 from MeshDevice import TICKS_IN_SLOT, TICKS_IN_CYCLE, CYCLES_IN_SUPERCYCLE, CYCLES_IN_MINUTE, MINUTES_IN_HOUR, HOURS_IN_DAY
-from MeshDevice import Device, timeFormat
+from MeshDevice import Device, CheckerLogger, timeFormat
 
 from MeshView import DevicesModel, Column, ColumnAction, FONT_METRICS_CORRECTION
 
@@ -28,8 +28,6 @@ SEED = 0
 
 WINDOW_SIZE = 2.0 / 3
 WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
-
-LOGGING_LEVEL = DEBUG # NOTSET
 
 class SeedValidator(QIntValidator):
     def __init__(self, parent):
@@ -132,6 +130,19 @@ class Mesh(QMainWindow):
         self.globalTimeValueLabel.configure()
         self.statusBar.hide()
         self.timer = QTimer(self)
+        # Setup logging
+        formatter = Formatter("%(asctime)s %(name)s\t%(levelname)s\t%(message)s", '%Y-%m-%d %H:%M:%S')
+        handler = StreamHandler()
+        handler.setFormatter(formatter)
+        setLoggerClass(CheckerLogger)
+        rootLogger = getLogger('')
+        rootLogger.addHandler(handler)
+        fileHandler = FileHandler('mesh.log')
+        fileHandler.setFormatter(formatter)
+        rootLogger.addHandler(fileHandler)
+        rootLogger.setLevel(DEBUG) # ToDo: or NOTSET?
+        self.logger = getLogger('Mesh')
+        self.logger.info("Starting")
         # Configure devices
         Device.configure(self.moveSpeedSlider.getSpeed, self)
         columns = tuple(Column(nColumn, *args) for (nColumn, args) in enumerate(COLUMNS_DATA))
@@ -142,18 +153,6 @@ class Mesh(QMainWindow):
         self.devicesMapFrame.configure(Device.devices, lambda a, b: Device.relation(a, b).distance, self.devicesModel.getDeviceSelection, self.devicesTableView.selectDevice, self.activeDeviceVisualSample, self.inactiveDeviceVisualSample)
         for sample in (self.activeDeviceVisualSample, self.inactiveDeviceVisualSample, self.deviceTableViewChangedSample):
             sample.hide()
-        # Setup logging
-        rootLogger = getLogger('')
-        formatter = Formatter("%(asctime)s %(name)s\t%(levelname)s\t%(message)s", '%Y-%m-%d %H:%M:%S')
-        handler = StreamHandler()
-        handler.setFormatter(formatter)
-        rootLogger.addHandler(handler)
-        fileHandler = FileHandler('mesh.log')
-        fileHandler.setFormatter(formatter)
-        rootLogger.addHandler(fileHandler)
-        rootLogger.setLevel(LOGGING_LEVEL)
-        self.logger = getLogger('Mesh')
-        self.logger.info("Starting")
         # Starting up!
         self.playing = True # will be toggled immediately by pause()
         self.pause()

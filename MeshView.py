@@ -180,14 +180,17 @@ class DeviceVisual(QLabel):
         self.deactivate()
 
     def activate(self, active = True):
-        self.active = active
+        self.device.setWatched(active)
         self.setStyleSheet(self.activeStyleSheet if active else self.inactiveStyleSheet)
 
     def deactivate(self, inactive = True):
         self.activate(not inactive)
 
+    def isActive(self):
+        return self.device.watched
+
     def toggle(self):
-        self.activate(not self.active)
+        self.activate(not self.device.watched)
 
     def mousePressEvent(self, event):
         self.callback(self, event.modifiers())
@@ -237,12 +240,12 @@ class DevicesMapFrame(QFrame):
                 self.selectDevice(otherVisual.viewSelection, False)
             self.selectDevice(deviceVisual.viewSelection)
         elif modifiers == Qt.ControlModifier:
-            self.selectDevice(deviceVisual.viewSelection, not deviceVisual.active)
+            self.selectDevice(deviceVisual.viewSelection, not deviceVisual.isActive())
         elif modifiers == Qt.ShiftModifier:
             self.selectDevice(deviceVisual.viewSelection)
-            activeVisuals = tuple(v for v in self.deviceVisuals if v.active)
+            activeVisuals = tuple(v for v in self.deviceVisuals if v.isActive())
             activeVisualsAndRanges = tuple((av, max(self.deviceDistance(av.device, ov.device) for ov in activeVisuals if ov is not av)) for av in activeVisuals)
-            for iav in (v for v in self.deviceVisuals if not v.active):
+            for iav in (v for v in self.deviceVisuals if not v.isActive()):
                 self.selectDevice(iav.viewSelection, all(self.deviceDistance(iav.device, av.device) <= radius for (av, radius) in activeVisualsAndRanges))
 
     def activate(self, number, active = True):

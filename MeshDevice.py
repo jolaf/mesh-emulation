@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from logging import getLogger
+from logging import getLogger, getLoggerClass, DEBUG
 from math import ceil, cos, exp, log, log10, pi, sin, sqrt
 from random import gauss, random, randint
 
@@ -52,7 +52,6 @@ def timeFormat(value):
     aspects.append(str(value))
     return ':'.join(reversed(aspects)) + (('.%d' % (remainder * 10)) if remainder else '')
 
-
 def effectiveGauss(m = 0, limit = 1):
     return min(max(gauss(m, limit / 3), m - limit), m + limit)
 
@@ -68,6 +67,16 @@ COLUMNS_DATA = (
     (True, True, 'DtT', 'Distance to target', 'distanceToTarget', MAP_SIZE, '%.1f'),
 )
 
+class CheckerLogger(getLoggerClass()):
+    checker = None
+
+    def configure(self, checker):
+        self.checker = checker
+
+    def _log(self, level, *args, **kwargs):
+        if not self.checker or self.checker(level):
+            super(CheckerLogger, self)._log(level, *args, **kwargs)
+
 class Device(object): # pylint: disable=R0902
     def __init__(self, number, parent):
         assert number in xrange(1, NUM_DEVICES + 1)
@@ -75,10 +84,13 @@ class Device(object): # pylint: disable=R0902
         self.parent = parent
         self.isMoving = number > NUM_STATIC_DEVICES
         self.logger = getLogger('Device#%d' % number)
+        self.logger.configure(self.logChecker) # pylint: disable=E1103
+        self.watched = None
         self.reset()
 
     @classmethod
     def configure(cls, getSpeed, parent):
+        cls.loggingLevel = DEBUG
         cls.getSpeed = getSpeed
         cls.devices = tuple(Device(i, parent) for i in xrange(1, NUM_DEVICES + 1))
         cls.relations = tuple([None,] * NUM_DEVICES for _ in xrange(NUM_DEVICES))
@@ -105,6 +117,16 @@ class Device(object): # pylint: disable=R0902
             device.checkChannel()
         for device in cls.devices: # deliver transmissions
             device.processRX()
+
+    def logChecker(self, level):
+        return self.watched and level >= self.loggingLevel
+
+    def setWatched(self, watched = True):
+        if self.watched is None and not watched:
+            return
+        self.watched = True
+        self.logger.debug('ON' if watched else 'OFF')
+        self.watched = watched
 
     def reset(self):
         self.timeSpeed = effectiveGauss(1, 0.1)
@@ -159,6 +181,7 @@ class Device(object): # pylint: disable=R0902
                     self.txPacket = PROBE # probing before transmission # ToDo: or just None?
                 else:
                     self.txPacket = self.tx() or None # start transmission, make sure it's not empty string or something
+                    self.logger.info('TX:%s', self.txPacket)
         elif self.nTickInSlot == TICKS_IN_PACKET and self.transmitting():
             self.txPacket = PROBE # cease transmission
         if self.transmitting():
@@ -174,24 +197,27 @@ class Device(object): # pylint: disable=R0902
         if self.txPacket is PROBE:
             self.txPacket = None
             if self.rxChannel:
-                self.rx(NOISE)
+                self.doRX(NOISE)
             return
         if not self.rxChannel: # channel seems quiet
             if self.rxPacket:
-                self.rxPacket = self.rxCounter = None
-                self.rx(NOISE)
+                self.doRX(NOISE, True)
         elif self.rxChannel is NOISE:
-            self.rxPacket = self.rxCounter = None
-            self.rx(NOISE)
+            self.doRX(NOISE, True)
         elif self.rxChannel is self.rxPacket: # continuing receiving the same packet
             if self.rxCounter < TICKS_IN_PACKET - 1:
                 self.rxCounter += 1 # continuing receiving
             else:
-                self.rxPacket = self.rxCounter = None
-                self.rx(self.rxChannel) # complete receving
+                self.doRX(self.rxChannel, True) # complete receving
         else: # there's a transmission but of a different packet
             self.rxPacket = self.rxChannel
             self.rxCounter = 1
+
+    def doRX(self, what, reset = False):
+        if reset:
+            self.rxPacket = self.rxCounter = None
+        self.logger.info('RX:%s', what)
+        self.rx(what)
 
     def prepare(self): # ToDo: Is it needed for rx? If not, move it to tx?
         '''Device logic function, called at the beginning of a tick.'''
