@@ -201,7 +201,7 @@ class DevicesMapFrame(QFrame):
         self.selectDevice = selectDevice
         offsetSize = self.fontMetrics().boundingRect(inactiveDeviceVisualSample.text()[0])
         self.offset = tuple(float(x) / 2 for x in (offsetSize.width() * FONT_METRICS_CORRECTION, offsetSize.height()))
-        self.deviceVisuals = tuple(DeviceVisual(device, getSelection(device.number - 1), activeDeviceVisualSample, inactiveDeviceVisualSample, self) for device in devices)
+        self.deviceVisuals = tuple(DeviceVisual(device, getSelection(device.number), activeDeviceVisualSample, inactiveDeviceVisualSample, self) for device in devices)
         self.oldWindowSize = None
         self.recalculate(self.width())
 

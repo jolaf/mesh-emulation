@@ -95,15 +95,6 @@ class TimeLabel(QLabel):
         self.setText(timeFormat(value))
         self.setStyleSheet(self.pittanceStyle if pittance else '')
 
-class DispatchingFormatter(object):
-    def __init__(self, defaultFormatter):
-        self.defaultFormatter = defaultFormatter
-
-    def format(self, record):
-        logger = getLogger(record.name)
-        formatter = logger.formatter if hasattr(logger, 'formatter') else self.defaultFormatter # pylint: disable=E1103
-        return formatter.format(record)
-
 class Mesh(QMainWindow):
     def __init__(self, *args, **kwargs):
         QMainWindow.__init__(self, *args, **kwargs)
@@ -139,21 +130,19 @@ class Mesh(QMainWindow):
         self.statusBar.hide()
         self.timer = QTimer(self)
         # Setup logging
-        defaultFormatter = Formatter('%(asctime)s %(name)s\t%(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S') # ToDo: Create local object time aware formatter for Mesh and Devices
-        systemFormatter = DispatchingFormatter(defaultFormatter)
+        formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handler = StreamHandler()
-        handler.setFormatter(systemFormatter)
-        setLoggerClass(CheckerLogger)
+        handler.setFormatter(formatter)
         rootLogger = getLogger('')
         rootLogger.addHandler(handler)
         fileHandler = FileHandler('mesh.log')
-        fileHandler.setFormatter(systemFormatter)
+        fileHandler.setFormatter(formatter)
         rootLogger.addHandler(fileHandler)
-        rootLogger.setLevel(DEBUG) # ToDo: or NOTSET?
-        self.systemLogger = getLogger('System')
-        self.meshLogger = getLogger('Mesh')
-        self.systemLogger.info("Start")
+        rootLogger.setLevel(DEBUG)
+        self.logger = getLogger('Mesh')
+        self.logger.info("Start")
         # Configure devices
+        setLoggerClass(CheckerLogger)
         Device.configure(self.moveSpeedSlider.getSpeed, self)
         columns = tuple(Column(nColumn, *args) for (nColumn, args) in enumerate(COLUMNS_DATA))
         self.devicesModel = DevicesModel(Device.devices, columns, self)
@@ -172,13 +161,16 @@ class Mesh(QMainWindow):
         self.resize(self.width() + self.leftLayout.geometry().height() - self.devicesMapFrame.width(), self.height())
 
     def closeEvent(self, _event):
-        self.systemLogger.info("Close")
+        self.logger.info("Close")
+
+    def getTime(self):
+        return self.time
 
     def reset(self):
         text = str(self.seedEdit.text()).strip()
         s = int(text) if text else None
         seed(s)
-        self.meshLogger.info("Reset(%s)" % s)
+        self.logger.info("Reset %s" % s)
         self.time = START_TIME - 1 # will be +1 at the first tick
         for device in Device.devices:
             device.reset()

@@ -6,7 +6,7 @@ from random import gauss, random, randint
 INF = float('inf')
 
 NUM_DEVICES = 100
-NUM_STATIC_DEVICES = 9
+NUM_STATIC_DEVICES = 10
 
 TICKS_IN_SLOT = 10
 TICKS_IN_PACKET = 8
@@ -28,12 +28,11 @@ START_TIME = reduce(lambda x, y: x * y, TIME_ASPECTS) # 1 day
 
 MAP_SIZE = 100
 
-HEARING_RADIUS = 0.1 * MAP_SIZE # chance of reception after TICKS_IN_PACKET ticks is 0.5 at 0.388 of this radius
 MIN_CHANCE = 0.01
+HEARING_RADIUS = 0.1 * MAP_SIZE # Chance of reception after TICKS_IN_PACKET ticks is MIN_CHANCE at this radius and 0.5 at 0.388 of this radius
 HEARING_CONSTANT = -TICKS_IN_PACKET * HEARING_RADIUS ** 2 / log(MIN_CHANCE)
 
-FASTEST_GOER = 10 # ToDo: Adjust, it should take 2 cycles to move through range, 36 km/h = 10 m/s = 1/2 R, R = 20m
-MAX_SPEED = float(MAP_SIZE) / FASTEST_GOER / TICKS_IN_CYCLE
+MAX_SPEED = float(HEARING_RADIUS) / 2 / TICKS_IN_CYCLE # It should take 2 cycles to move through reasonable range (2*(R/2) = R), e. g. 36 km/h = 10 m/s => R = 20m
 
 NOISE = 'NOISE'
 LISTEN = 'LISTEN'
@@ -73,18 +72,22 @@ class CheckerLogger(getLoggerClass()):
     def configure(self, checker):
         self.checker = checker
 
-    def _log(self, level, *args, **kwargs):
-        if not self.checker or self.checker(level):
-            super(CheckerLogger, self)._log(level, *args, **kwargs)
+    def _log(self, level, message, *args, **kwargs):
+        assert self.checker
+        prefix = self.checker(level)
+        if prefix:
+            super(CheckerLogger, self)._log(level, "%s%s" % (prefix, message), *args, **kwargs)
 
 class Device(object): # pylint: disable=R0902
     def __init__(self, number, parent):
-        assert number in xrange(1, NUM_DEVICES + 1)
+        assert number in xrange(0, NUM_DEVICES)
         self.number = number
+        self.name = ('Device#%%0%dd' % len(str(NUM_DEVICES - 1))) % number
         self.parent = parent
-        self.isMoving = number > NUM_STATIC_DEVICES
-        self.logger = getLogger('Device#%d' % number)
+        self.isMoving = number >= NUM_STATIC_DEVICES
+        self.logger = getLogger(self.name)
         self.logger.configure(self.logChecker) # pylint: disable=E1103
+        self.prevousSlotInCycle = None # ToDo: move to other class
         self.watched = None
         self.reset()
 
@@ -92,7 +95,8 @@ class Device(object): # pylint: disable=R0902
     def configure(cls, getSpeed, parent):
         cls.loggingLevel = DEBUG
         cls.getSpeed = getSpeed
-        cls.devices = tuple(Device(i, parent) for i in xrange(1, NUM_DEVICES + 1))
+        cls.getGlobalTime = parent.getTime
+        cls.devices = tuple(Device(i, parent) for i in xrange(0, NUM_DEVICES))
         cls.relations = tuple([None,] * NUM_DEVICES for _ in xrange(NUM_DEVICES))
         for i in xrange(NUM_DEVICES):
             for j in xrange(i + 1, NUM_DEVICES):
@@ -100,16 +104,16 @@ class Device(object): # pylint: disable=R0902
 
     @classmethod
     def relation(cls, a, b):
-        return cls.relations[a.number - 1][b.number - 1]
+        return cls.relations[a.number][b.number]
 
     @classmethod
     def fullTick(cls):
         for device in cls.devices: # move time, move devices
-            device.tick()
+            device.move()
         for i in xrange(NUM_DEVICES): # calculate distances
             for j in xrange(i + 1, NUM_DEVICES):
                 cls.relations[i][j].update()
-        for device in cls.devices: # prepare devices
+        for device in cls.devices: # prepare to transmission
             device.prepare()
         for device in cls.devices: # handle transmissions
             device.processTX()
@@ -119,18 +123,18 @@ class Device(object): # pylint: disable=R0902
             device.processRX()
 
     def logChecker(self, level):
-        return self.watched and level >= self.loggingLevel
+        return "%s  %s  %s  " % (timeFormat(self.getGlobalTime()), self.name, timeFormat(self.time)) if self.watched and level >= self.loggingLevel else None
 
     def setWatched(self, watched = True):
         if self.watched is None and not watched:
             return
         self.watched = True
-        self.logger.debug('ON' if watched else 'OFF')
+        self.logger.debug("ON" if watched else "OFF")
         self.watched = watched
 
     def reset(self):
-        self.timeSpeed = effectiveGauss(1, 0.1)
-        self.time = START_TIME * effectiveGauss(1, 0.9) - self.timeSpeed
+        self.timeSpeed = 1.0 # effectiveGauss(1, 0.1) # ToDo
+        self.time = START_TIME - self.timeSpeed # START_TIME * effectiveGauss(1, 0.9) - self.timeSpeed
         self.timeToTarget = None
         self.x = MAP_SIZE * random()
         self.y = MAP_SIZE * random()
@@ -151,7 +155,7 @@ class Device(object): # pylint: disable=R0902
         else:
             self.direction = self.sinD = self.cosD = self.distanceToTarget = self.moveSpeed = None
 
-    def tick(self):
+    def move(self):
         self.time += self.timeSpeed
         (self.nSlot, self.nTickInSlot) = divmod(int(self.time), TICKS_IN_SLOT)
         if self.isMoving:
@@ -169,7 +173,7 @@ class Device(object): # pylint: disable=R0902
         return self.txPacket in LISTENING
 
     def checkChannel(self):
-        reachableRelations = (r for r in self.relations[self.number - 1] if r and r.chance)
+        reachableRelations = (r for r in self.relations[self.number] if r and r.chance)
         reachableDevices = (r.other(self) for r in reachableRelations if random() < r.chance)
         heardDevices = tuple(d for d in reachableDevices if d.transmitting())
         self.rxChannel = (heardDevices[0].txPacket if len(heardDevices) == 1 else NOISE) if heardDevices else None
@@ -181,7 +185,6 @@ class Device(object): # pylint: disable=R0902
                     self.txPacket = PROBE # probing before transmission # ToDo: or just None?
                 else:
                     self.txPacket = self.tx() or None # start transmission, make sure it's not empty string or something
-                    self.logger.info('TX:%s', self.txPacket)
         elif self.nTickInSlot == TICKS_IN_PACKET and self.transmitting():
             self.txPacket = PROBE # cease transmission
         if self.transmitting():
@@ -190,6 +193,8 @@ class Device(object): # pylint: disable=R0902
             self.rxCount += 1
         self.tickCount += 1
         self.powerUsage = float(self.txCount + self.rxCount) / self.tickCount
+        if self.txPacket:
+            self.logger.info("TX: %s", self.txPacket)
 
     def processRX(self):
         if not self.listening():
@@ -216,15 +221,16 @@ class Device(object): # pylint: disable=R0902
     def doRX(self, what, reset = False):
         if reset:
             self.rxPacket = self.rxCounter = None
-        self.logger.info('RX:%s', what)
+        self.logger.info("RX: %s", what)
         self.rx(what)
 
     def prepare(self): # ToDo: Is it needed for rx? If not, move it to tx?
         '''Device logic function, called at the beginning of a tick.'''
         (self.nCycle, self.nSlotInCycle) = divmod(self.nSlot, SLOTS_IN_CYCLE)
         self.nCycleInSupercycle = self.nCycle % CYCLES_IN_SUPERCYCLE
-        if self.nCycleInSupercycle == 0:
+        if self.nCycleInSupercycle == 0 and self.nSlotInCycle == 0 and self.prevousSlotInCycle != 0:
             self.cycleToReceive = randint(0, CYCLES_IN_SUPERCYCLE - 1)
+        self.prevousSlotInCycle = self.nSlotInCycle
 
     def tx(self):
         '''Device logic function, called after prepare().
@@ -233,7 +239,7 @@ class Device(object): # pylint: disable=R0902
            or None if nothing is to be done.'''
         if self.nCycleInSupercycle == self.cycleToReceive:
             return LISTEN # listening cycle
-        if self.nSlotInCycle != self.number - 1: # ToDo: also skip transmission if channel was busy after previous transmission
+        if self.nSlotInCycle != self.number: # ToDo: also skip transmission if channel was busy after previous transmission
             return None  # not our slot
          # Transmit!
         return self.createPacket()
@@ -249,7 +255,7 @@ class Device(object): # pylint: disable=R0902
         return '#%d < %s' % (self.number, rxPacket)
 
     def createPacket(self):
-        return '#%d >' % self.number
+        return '#%d OK' % self.number
 
 class DeviceRelation(object):
     def __init__(self, a, b):
