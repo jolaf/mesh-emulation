@@ -1,24 +1,53 @@
 #!/usr/bin/python
 from random import randint
 
-from MeshDevice import Device
+from MeshDevice import Device, timeFormat
 from MeshDevice import LISTEN, NOISE, NOISE_BEFORE, OK
-from MeshDevice import SLOTS_IN_CYCLE, CYCLES_IN_SUPERCYCLE
+from MeshDevice import NUM_DEVICES, TIME_TTL
+from MeshDevice import TICKS_IN_CYCLE, TICKS_IN_PACKET, SLOTS_IN_CYCLE, CYCLES_IN_SUPERCYCLE
+
+class Packet(object):
+    def __init__(self, device):
+        self.sender = device.number
+        self.nCycle = device.nCycle
+        self.timeAuthor = device.timeAuthor
+        self.timeAge = device.timeAge
+
+    def __str__(self):
+        return "#%d%s:%s" % (self.sender, ('(%d)' % self.timeAuthor) if self.timeAuthor else '', timeFormat(self.nCycle))
 
 class TestDevice(Device):
     def __init__(self, *args, **kwargs):
         Device.__init__(self, *args, **kwargs)
-        self.prevousSlotInCycle = None
+        self.previousSlotInCycle = None
         self.skipTransmissions = None
+        self.timeAuthor = self.timeAge = None
+        self.states = (None,) * NUM_DEVICES
+
+    def adjustTime(self, packet):
+        if packet:
+            self.timeAuthor = packet.timeAuthor
+            self.timeAge = packet.timeAge
+            self.time = (packet.nCycle * SLOTS_IN_CYCLE + packet.sender) * TICKS_IN_CYCLE + 0.1 * (TICKS_IN_PACKET - 1) # ToDo: layers separation breach, fix!
+        else:
+            self.timeAuthor = self.timeAge = None
+        self.logger.info("Time adjusted to: %s" % (self.timeAuthor if self.timeAuthor != None else 'self'))
 
     def prepare(self):
         '''Device logic function, called at the beginning of a tick.
-           Should make preparations usable for both tx() and rx().'''
+           Should make preparations usable for both tx() and rx().
+           Basic input parameter is device local time as self.nSlot.'''
         (self.nCycle, self.nSlotInCycle) = divmod(self.nSlot, SLOTS_IN_CYCLE)
         self.nCycleInSupercycle = self.nCycle % CYCLES_IN_SUPERCYCLE
-        if self.nCycleInSupercycle == 0 and self.nSlotInCycle == 0 and self.prevousSlotInCycle != 0:
-            self.cycleToReceive = randint(0, CYCLES_IN_SUPERCYCLE - 1)
-        self.prevousSlotInCycle = self.nSlotInCycle
+        if self.previousSlotInCycle != self.nSlotInCycle:
+            if self.nCycleInSupercycle == 0 and self.nSlotInCycle == 0:
+                self.cycleToReceive = randint(0, CYCLES_IN_SUPERCYCLE - 1)
+            if self.timeAuthor:
+                if self.timeAge < TIME_TTL:
+                    self.timeAge += 1
+                else:
+                    self.adjustTime(None)
+        self.previousSlotInCycle = self.nSlotInCycle
 
     def tx(self):
         '''Device logic function, called after prepare().
@@ -31,7 +60,7 @@ class TestDevice(Device):
             return LISTEN # listening cycle
         if self.nSlotInCycle != self.number: # not our transmission slot
             return None
-        return '#%d OK' % self.number # ToDo: include real packet content here
+        return Packet(self)
 
     def rx(self, rxPacket):
         '''Device logic function, called after prepare() and tx().
@@ -46,4 +75,9 @@ class TestDevice(Device):
         elif rxPacket is OK:
             pass # we're just happy!
         else:
-            pass # ToDo: include real incoming packet processing facilities
+            assert rxPacket.__class__ is Packet
+            remoteAuthor = rxPacket.timeAuthor if rxPacket.timeAuthor != None else rxPacket.sender
+            localAuthor = self.timeAuthor if self.timeAuthor != None else self.number
+            if (remoteAuthor, rxPacket.timeAge) < (localAuthor, self.timeAge):
+                self.adjustTime(rxPacket)
+            self.states[rxPacket.sender] = self.nCycle

@@ -34,6 +34,10 @@ HEARING_CONSTANT = -TICKS_IN_PACKET * HEARING_RADIUS ** 2 / log(MIN_CHANCE)
 
 MAX_SPEED = float(HEARING_RADIUS) / 2 / TICKS_IN_CYCLE # It should take 2 cycles to move through reasonable range (2*(R/2) = R), e. g. 36 km/h = 10 m/s => R = 20m
 
+MAX_TIME_DEVIATION = 0.01 # 10^-4 is a reliable value, in real applications 10^-5 should be acceptable
+
+TIME_TTL = float(TICKS_IN_SLOT - TICKS_IN_PACKET - 1) / MAX_TIME_DEVIATION / TICKS_IN_SLOT
+
 LISTEN = 'LISTEN'
 NOISE = 'NOISE'
 NOISE_BEFORE = 'NOISE_BEFORE'
@@ -126,24 +130,25 @@ class Device(object): # pylint: disable=R0902
             device.processRX()
 
     def logChecker(self, level):
-        return "%s  %s  %s  %d%%  " % (timeFormat(self.getGlobalTime()), self.name, timeFormat(self.time), self.powerUsage * 100) if self.watched and level >= self.loggingLevel else None
+        return "%s  %s  %s  %d%%  " % (timeFormat(self.getGlobalTime()), self.name, timeFormat(self.time), self.tranceiverUsage * 100) if self.watched and level >= self.loggingLevel else None
 
     def setWatched(self, watched = True):
         if self.watched is None and not watched:
             return
         self.watched = True
-        self.logger.debug("ON" if watched else "OFF")
+        self.logger.debug("on" if watched else "off")
         self.watched = watched
 
     def reset(self):
-        self.timeSpeed = 1.0 # effectiveGauss(1, 0.1) # ToDo
+        self.timeSpeed = 1.0 # effectiveGauss(1, MAX_TIME_DEVIATION) # ToDo
         self.time = START_TIME - self.timeSpeed # START_TIME * effectiveGauss(1, 0.9) - self.timeSpeed
         self.timeToTarget = None
         self.x = MAP_SIZE * random()
         self.y = MAP_SIZE * random()
         self.cycleToReceive = 0
         self.txPacket = self.rxPacket = self.oldTxPacket = self.rxCounter = self.rxChannel = None
-        self.txCount = self.rxCount = self.tickCount = self.powerUsage = 0
+        self.txCount = self.rxCount = self.tickCount = 0
+        self.txUsage = self.rxUsage = self.tranceiverUsage = 0
         self.setTarget()
 
     def setTarget(self):
@@ -196,7 +201,9 @@ class Device(object): # pylint: disable=R0902
         elif self.listening():
             self.rxCount += 1
         self.tickCount += 1
-        self.powerUsage = float(self.txCount + self.rxCount) / self.tickCount
+        self.txUsage = float(self.txCount) / self.tickCount
+        self.rxUsage = float(self.rxCount) / self.tickCount
+        self.tranceiverUsage = float(self.txCount + self.rxCount) / self.tickCount
         if self.txPacket != self.oldTxPacket:
             self.oldTxPacket = self.txPacket
             self.logger.info("TX: %s" % self.txPacket) # ToDo: improve filtering, make this debug, move logical logging to TestDevice?
@@ -232,7 +239,8 @@ class Device(object): # pylint: disable=R0902
 
     def prepare(self):
         '''Device logic function, called at the beginning of a tick.
-           Should make preparations usable for both tx() and rx().'''
+           Should make preparations usable for both tx() and rx().
+           Basic input parameter is device local time as self.nSlot.'''
         pass
 
     def tx(self):
