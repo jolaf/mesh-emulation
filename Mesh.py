@@ -237,7 +237,7 @@ class Mesh(QMainWindow):
             self.previousTickTime = now
             self.tick(firstWait)
 
-    def tick(self, pittance = False, firstTick = False): # ToDo: avoid transmissions on first tick
+    def tick(self, pittance = False, firstTick = False):
         self.time += 1
         self.globalTimeValueLabel.setValue(self.time, pittance)
         DeviceClass.fullTick()

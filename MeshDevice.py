@@ -34,12 +34,16 @@ HEARING_CONSTANT = -TICKS_IN_PACKET * HEARING_RADIUS ** 2 / log(MIN_CHANCE)
 
 MAX_SPEED = float(HEARING_RADIUS) / 2 / TICKS_IN_CYCLE # It should take 2 cycles to move through reasonable range (2*(R/2) = R), e. g. 36 km/h = 10 m/s => R = 20m
 
-NOISE = 'NOISE'
 LISTEN = 'LISTEN'
+NOISE = 'NOISE'
+NOISE_BEFORE = 'NOISE_BEFORE'
 PROBE = 'PROBE'
+PROBE_AFTER = 'PROBE_AFTER'
+OK = 'OK'
 
-LISTENING = (LISTEN, PROBE)
-SILENT = LISTENING + (None,)
+PROBES = (PROBE, PROBE_AFTER)
+
+LISTENING = (LISTEN,) + PROBES
 
 def timeFormat(value):
     remainder = value % 1
@@ -138,7 +142,7 @@ class Device(object): # pylint: disable=R0902
         self.x = MAP_SIZE * random()
         self.y = MAP_SIZE * random()
         self.cycleToReceive = 0
-        self.txPacket = self.rxPacket = self.rxCounter = self.rxChannel = None
+        self.txPacket = self.rxPacket = self.oldTxPacket = self.rxCounter = self.rxChannel = None
         self.txCount = self.rxCount = self.tickCount = self.powerUsage = 0
         self.setTarget()
 
@@ -166,7 +170,7 @@ class Device(object): # pylint: disable=R0902
                 self.setTarget()
 
     def transmitting(self):
-        return self.txPacket not in SILENT
+        return self.txPacket and not self.listening()
 
     def listening(self):
         return self.txPacket in LISTENING
@@ -174,71 +178,77 @@ class Device(object): # pylint: disable=R0902
     def checkChannel(self):
         reachableRelations = (r for r in self.relations[self.number] if r and r.chance)
         reachableDevices = (r.other(self) for r in reachableRelations if random() < r.chance)
-        heardDevices = tuple(d for d in reachableDevices if d.transmitting())
+        heardDevices = tuple(d for d in reachableDevices if d.transmitting()) # ToDo: Make all this info visible in logging
         self.rxChannel = (heardDevices[0].txPacket if len(heardDevices) == 1 else NOISE) if heardDevices else None
 
     def processTX(self):
-        if self.nTickInSlot == 0: # ToDo: what if 0 gets skipped because of uneven time speed?
-            if not self.rxPacket: # If we're listening, continue receiving
-                if self.rxChannel:
-                    self.txPacket = PROBE # probing before transmission # ToDo: or just None?
-                else:
-                    self.txPacket = self.tx() or None # start transmission, make sure it's not empty string or something
+        if self.nTickInSlot == 0: # If 0 gets skipped because of uneven time speed, transmission will be skipped.
+            if self.rxPacket:
+                pass # if we're receiving, continue receiving, do not transmit
+            else:
+                self.txPacket = self.tx() or None # start transmission, make sure it's not empty string or something else False
+                if self.rxChannel: # if something was in channel on previous tick
+                    self.txPacket = NOISE_BEFORE
         elif self.nTickInSlot == TICKS_IN_PACKET and self.transmitting():
-            self.txPacket = PROBE # cease transmission
+            self.txPacket = PROBE_AFTER # cease transmission
         if self.transmitting():
             self.txCount += 1 # calculate power consumption
         elif self.listening():
             self.rxCount += 1
         self.tickCount += 1
         self.powerUsage = float(self.txCount + self.rxCount) / self.tickCount
-        if self.txPacket:
-            self.logger.info("TX: %s" % self.txPacket)
+        if self.txPacket != self.oldTxPacket:
+            self.oldTxPacket = self.txPacket
+            self.logger.info("TX: %s" % self.txPacket) # ToDo: improve filtering, make this debug, move logical logging to TestDevice?
 
     def processRX(self):
         if not self.listening():
-            return
-        if self.txPacket is PROBE:
+            pass
+        elif self.txPacket is NOISE_BEFORE:
             self.txPacket = None
-            if self.rxChannel:
-                self.doRX(NOISE)
-            return
-        if not self.rxChannel: # channel seems quiet
+            self.doRX(NOISE_BEFORE)
+        elif self.txPacket in PROBES:
+            self.txPacket = None
+            self.doRX(NOISE if self.rxChannel else OK)
+        elif not self.rxChannel: # channel seems quiet
             if self.rxPacket:
-                self.doRX(NOISE, True)
+                self.doRX(NOISE)
         elif self.rxChannel is NOISE:
-            self.doRX(NOISE, True)
+            self.doRX(NOISE)
         elif self.rxChannel is self.rxPacket: # continuing receiving the same packet
             if self.rxCounter < TICKS_IN_PACKET - 1:
                 self.rxCounter += 1 # continuing receiving
             else:
-                self.doRX(self.rxChannel, True) # complete receving
+                self.doRX(self.rxPacket) # complete receving
         else: # there's a transmission but of a different packet
             self.rxPacket = self.rxChannel
             self.rxCounter = 1
 
-    def doRX(self, what, reset = False):
+    def doRX(self, what):
         assert what
-        if reset:
-            self.rxPacket = self.rxCounter = None
+        self.rxPacket = self.rxCounter = None
         self.logger.info("RX: %s" % what)
         self.rx(what)
 
-    def prepare(self): # ToDo: Is it needed for rx? If not, move it to tx?
-        '''Device logic function, called at the beginning of a tick.'''
+    def prepare(self):
+        '''Device logic function, called at the beginning of a tick.
+           Should make preparations usable for both tx() and rx().'''
         pass
 
     def tx(self):
         '''Device logic function, called after prepare().
            Should return a packet to transmit,
            or LISTEN to listen for incoming transmissions,
+           or PROBE to check if channel is busy,
            or None if nothing is to be done.'''
         pass
 
     def rx(self, rxPacket):
-        '''Device logic function, called after prepare() and tx()
-           if there was an incoming transmission.
-           rxPacket is either a complete received packet or NOISE.'''
+        '''Device logic function, called after prepare() and tx().
+           rxPacket is either a complete received packet,
+           or NOISE_BEFORE if a transmission was cancelled because the channel was busy,
+           or NOISE if probe was issued or transmission was successful but channel was found busy afterwards,
+           or OK if probe was issued or transmission was successful and channel was found clear afterwards.'''
         pass
 
 class DeviceRelation(object):
