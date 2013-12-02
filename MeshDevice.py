@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from logging import getLogger, getLoggerClass, DEBUG
 from math import ceil, cos, exp, log, log10, pi, sin, sqrt
-from random import gauss, random, randint
+from random import gauss, random
 
 INF = float('inf')
 
@@ -87,7 +87,6 @@ class Device(object): # pylint: disable=R0902
         self.isMoving = number >= NUM_STATIC_DEVICES
         self.logger = getLogger(self.name)
         self.logger.configure(self.logChecker) # pylint: disable=E1103
-        self.prevousSlotInCycle = None # ToDo: move to other class
         self.watched = None
         self.reset()
 
@@ -96,7 +95,7 @@ class Device(object): # pylint: disable=R0902
         cls.loggingLevel = DEBUG
         cls.getSpeed = getSpeed
         cls.getGlobalTime = parent.getTime
-        cls.devices = tuple(Device(i, parent) for i in xrange(0, NUM_DEVICES))
+        cls.devices = tuple(cls(i, parent) for i in xrange(0, NUM_DEVICES))
         cls.relations = tuple([None,] * NUM_DEVICES for _ in xrange(NUM_DEVICES))
         for i in xrange(NUM_DEVICES):
             for j in xrange(i + 1, NUM_DEVICES):
@@ -219,6 +218,7 @@ class Device(object): # pylint: disable=R0902
             self.rxCounter = 1
 
     def doRX(self, what, reset = False):
+        assert what
         if reset:
             self.rxPacket = self.rxCounter = None
         self.logger.info("RX: %s", what)
@@ -226,36 +226,20 @@ class Device(object): # pylint: disable=R0902
 
     def prepare(self): # ToDo: Is it needed for rx? If not, move it to tx?
         '''Device logic function, called at the beginning of a tick.'''
-        (self.nCycle, self.nSlotInCycle) = divmod(self.nSlot, SLOTS_IN_CYCLE)
-        self.nCycleInSupercycle = self.nCycle % CYCLES_IN_SUPERCYCLE
-        if self.nCycleInSupercycle == 0 and self.nSlotInCycle == 0 and self.prevousSlotInCycle != 0:
-            self.cycleToReceive = randint(0, CYCLES_IN_SUPERCYCLE - 1)
-        self.prevousSlotInCycle = self.nSlotInCycle
+        pass
 
     def tx(self):
         '''Device logic function, called after prepare().
            Should return a packet to transmit,
            or LISTEN to listen for incoming transmissions,
            or None if nothing is to be done.'''
-        if self.nCycleInSupercycle == self.cycleToReceive:
-            return LISTEN # listening cycle
-        if self.nSlotInCycle != self.number: # ToDo: also skip transmission if channel was busy after previous transmission
-            return None  # not our slot
-         # Transmit!
-        return self.createPacket()
+        pass
 
     def rx(self, rxPacket):
         '''Device logic function, called after prepare() and tx()
            if there was an incoming transmission.
            rxPacket is either a complete received packet or NOISE.'''
-        assert rxPacket
-        if rxPacket is NOISE:
-            # ToDo: if this is after transmission, do not transmit for a supercycle?
-            return
-        return '#%d < %s' % (self.number, rxPacket)
-
-    def createPacket(self):
-        return '#%d OK' % self.number
+        pass
 
 class DeviceRelation(object):
     def __init__(self, a, b):

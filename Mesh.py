@@ -18,7 +18,9 @@ from PyQt4.QtGui import QPushButton, QDesktopWidget, QLabel, QLineEdit, QMainWin
 
 from MeshDevice import COLUMNS_DATA, START_TIME
 from MeshDevice import TICKS_IN_SLOT, TICKS_IN_CYCLE, CYCLES_IN_SUPERCYCLE, CYCLES_IN_MINUTE, MINUTES_IN_HOUR, HOURS_IN_DAY
-from MeshDevice import Device, CheckerLogger, timeFormat
+from MeshDevice import CheckerLogger, timeFormat
+
+from MeshTestDevice import TestDevice
 
 from MeshView import DevicesModel, Column, ColumnAction, FONT_METRICS_CORRECTION
 
@@ -28,6 +30,8 @@ SEED = 0
 
 WINDOW_SIZE = 2.0 / 3
 WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
+
+DeviceClass = TestDevice
 
 class SeedValidator(QIntValidator):
     def __init__(self, parent):
@@ -143,13 +147,13 @@ class Mesh(QMainWindow):
         self.logger.info("Start")
         # Configure devices
         setLoggerClass(CheckerLogger)
-        Device.configure(self.moveSpeedSlider.getSpeed, self)
+        DeviceClass.configure(self.moveSpeedSlider.getSpeed, self)
         columns = tuple(Column(nColumn, *args) for (nColumn, args) in enumerate(COLUMNS_DATA))
-        self.devicesModel = DevicesModel(Device.devices, columns, self)
+        self.devicesModel = DevicesModel(DeviceClass.devices, columns, self)
         self.devicesTableView.configure(self.devicesModel, self.devicesMapFrame, self.deviceTableViewChangedSample)
         for column in columns:
             ColumnAction(column, self.devicesTableView.setColumnHidden, self.columnsMenu)
-        self.devicesMapFrame.configure(Device.devices, lambda a, b: Device.relation(a, b).distance, self.devicesModel.getDeviceSelection, self.devicesTableView.selectDevice, self.activeDeviceVisualSample, self.inactiveDeviceVisualSample)
+        self.devicesMapFrame.configure(DeviceClass.devices, lambda a, b: DeviceClass.relation(a, b).distance, self.devicesModel.getDeviceSelection, self.devicesTableView.selectDevice, self.activeDeviceVisualSample, self.inactiveDeviceVisualSample)
         for sample in (self.activeDeviceVisualSample, self.inactiveDeviceVisualSample, self.deviceTableViewChangedSample):
             sample.hide()
         # Starting up!
@@ -172,7 +176,7 @@ class Mesh(QMainWindow):
         seed(s)
         self.logger.info("Reset %s" % s)
         self.time = START_TIME - 1 # will be +1 at the first tick
-        for device in Device.devices:
+        for device in DeviceClass.devices:
             device.reset()
         self.tick(firstTick = True)
 
@@ -236,7 +240,7 @@ class Mesh(QMainWindow):
     def tick(self, pittance = False, firstTick = False): # ToDo: avoid transmissions on first tick
         self.time += 1
         self.globalTimeValueLabel.setValue(self.time, pittance)
-        Device.fullTick()
+        DeviceClass.fullTick()
         if self.playing or self.redrawWhileSkipping or firstTick:
             self.devicesModel.refresh(firstTick)
             self.devicesMapFrame.refresh()
