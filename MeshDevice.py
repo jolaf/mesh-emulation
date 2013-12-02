@@ -5,7 +5,7 @@ from random import gauss, random
 
 INF = float('inf')
 
-NUM_DEVICES = 100
+NUM_DEVICES = 20 # ToDo
 NUM_STATIC_DEVICES = 10
 
 TICKS_IN_SLOT = 10
@@ -122,7 +122,7 @@ class Device(object): # pylint: disable=R0902
             device.processRX()
 
     def logChecker(self, level):
-        return "%s  %s  %s  " % (timeFormat(self.getGlobalTime()), self.name, timeFormat(self.time)) if self.watched and level >= self.loggingLevel else None
+        return "%s  %s  %s  %d%%  " % (timeFormat(self.getGlobalTime()), self.name, timeFormat(self.time), self.powerUsage * 100) if self.watched and level >= self.loggingLevel else None
 
     def setWatched(self, watched = True):
         if self.watched is None and not watched:
@@ -193,7 +193,7 @@ class Device(object): # pylint: disable=R0902
         self.tickCount += 1
         self.powerUsage = float(self.txCount + self.rxCount) / self.tickCount
         if self.txPacket:
-            self.logger.info("TX: %s", self.txPacket)
+            self.logger.info("TX: %s" % self.txPacket)
 
     def processRX(self):
         if not self.listening():
@@ -221,7 +221,7 @@ class Device(object): # pylint: disable=R0902
         assert what
         if reset:
             self.rxPacket = self.rxCounter = None
-        self.logger.info("RX: %s", what)
+        self.logger.info("RX: %s" % what)
         self.rx(what)
 
     def prepare(self): # ToDo: Is it needed for rx? If not, move it to tx?
