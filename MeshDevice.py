@@ -5,7 +5,7 @@ from random import gauss, random
 
 INF = float('inf')
 
-NUM_DEVICES = 20 # ToDo
+NUM_DEVICES = 100
 NUM_STATIC_DEVICES = 10
 
 TICKS_IN_SLOT = 10
@@ -29,12 +29,12 @@ START_TIME = reduce(lambda x, y: x * y, TIME_ASPECTS) # 1 day
 MAP_SIZE = 100
 
 MIN_CHANCE = 0.01
-HEARING_RADIUS = 0.1 * MAP_SIZE # Chance of reception after TICKS_IN_PACKET ticks is MIN_CHANCE at this radius and 0.5 at 0.388 of this radius
+HEARING_RADIUS = 0.3 * MAP_SIZE # Chance of reception after TICKS_IN_PACKET ticks is MIN_CHANCE at this radius and 0.5 at 0.388 of this radius
 HEARING_CONSTANT = -TICKS_IN_PACKET * HEARING_RADIUS ** 2 / log(MIN_CHANCE)
 
 MAX_SPEED = float(HEARING_RADIUS) / 2 / TICKS_IN_CYCLE # It should take 2 cycles to move through reasonable range (2*(R/2) = R), e. g. 36 km/h = 10 m/s => R = 20m
 
-MAX_TIME_DEVIATION = 0.01 # 10^-4 is a reliable value, in real applications 10^-5 should be acceptable
+MAX_TIME_DEVIATION = 0.0001 # 10^-4 is a reliable value, in real applications 10^-5 should be acceptable
 
 TIME_TTL = float(TICKS_IN_SLOT - TICKS_IN_PACKET - 1) / MAX_TIME_DEVIATION / TICKS_IN_SLOT
 
@@ -65,7 +65,7 @@ def effectiveGauss(m = 0, limit = 1):
 COLUMNS_DATA = (
     (True, False, 'ID', 'Device ID', 'number', NUM_DEVICES),
     (True, False, 'Moving', None, 'isMoving', True, None, lambda x: 'yes' if x else 'no'),
-    (True, True, 'Time speed', 'Local time speed deviation', 'timeSpeed', 1, '%+.1f%%', lambda x: (x - 1) * 100),
+    (True, False, 'Time speed', 'Local time speed deviation', 'timeSpeed', -1 / MAX_TIME_DEVIATION, '%d', lambda x: 1 / (x - 1) / TICKS_IN_CYCLE if x - 1 else 0),
     (True, True, 'Time', 'Local time', 'time', START_TIME + 0.1, None, timeFormat),
     (True, True, 'X', None, 'x', MAP_SIZE, '%.1f'),
     (True, True, 'Y', None, 'y', MAP_SIZE, '%.1f'),
@@ -129,8 +129,11 @@ class Device(object): # pylint: disable=R0902
         for device in cls.devices: # deliver transmissions
             device.processRX()
 
+    def getStringTime(self):
+        return timeFormat(self.nTick)
+
     def logChecker(self, level):
-        return "%s  %s  %s  %d%%  " % (timeFormat(self.getGlobalTime()), self.name, timeFormat(self.time), self.tranceiverUsage * 100) if self.watched and level >= self.loggingLevel else None
+        return "%s  %s  %s  %d%%  " % (timeFormat(self.getGlobalTime()), self.name, self.getStringTime(), self.tranceiverUsage * 100) if self.watched and level >= self.loggingLevel else None
 
     def setWatched(self, watched = True):
         if self.watched is None and not watched:
@@ -140,8 +143,8 @@ class Device(object): # pylint: disable=R0902
         self.watched = watched
 
     def reset(self):
-        self.timeSpeed = 1.0 # effectiveGauss(1, MAX_TIME_DEVIATION) # ToDo
-        self.time = START_TIME - self.timeSpeed # START_TIME * effectiveGauss(1, 0.9) - self.timeSpeed
+        self.timeSpeed = effectiveGauss(1, MAX_TIME_DEVIATION) if self.number else 1
+        self.time = START_TIME * (effectiveGauss(1, 0.9) if self.number else 1) - self.timeSpeed
         self.timeToTarget = None
         self.x = MAP_SIZE * random()
         self.y = MAP_SIZE * random()
@@ -165,7 +168,8 @@ class Device(object): # pylint: disable=R0902
 
     def move(self):
         self.time += self.timeSpeed
-        (self.nSlot, self.nTickInSlot) = divmod(int(self.time), TICKS_IN_SLOT)
+        self.nTick = int(self.time)
+        (self.nSlot, self.nTickInSlot) = divmod(self.nTick, TICKS_IN_SLOT)
         if self.isMoving:
             move = self.moveSpeed * self.getSpeed()
             self.x = max(0, min(MAP_SIZE, self.x + move * self.cosD))
@@ -175,16 +179,36 @@ class Device(object): # pylint: disable=R0902
                 self.setTarget()
 
     def transmitting(self):
-        return self.txPacket and not self.listening()
+        return self.txPacket and self.txPacket is not NOISE_BEFORE and not self.listening()
 
     def listening(self):
         return self.txPacket in LISTENING
 
     def checkChannel(self):
-        reachableRelations = (r for r in self.relations[self.number] if r and r.chance)
-        reachableDevices = (r.other(self) for r in reachableRelations if random() < r.chance)
-        heardDevices = tuple(d for d in reachableDevices if d.transmitting()) # ToDo: Make all this info visible in logging
-        self.rxChannel = (heardDevices[0].txPacket if len(heardDevices) == 1 else NOISE) if heardDevices else None
+        heardDevices = []
+        statuses = [None,] * NUM_DEVICES
+        for relation in self.relations[self.number]:
+            if relation and relation.chance:
+                other = relation.other(self)
+                if other.transmitting():
+                    if random() < relation.chance:
+                        heardDevices.append(other)
+                    else:
+                        statuses[other.number] = '='
+                else:
+                    statuses[other.number] = '_'
+        if heardDevices:
+            if len(heardDevices) == 1:
+                heardDevice = heardDevices[0]
+                self.rxChannel = heardDevice.txPacket
+                statuses[heardDevice.number] = '+'
+            else:
+                self.rxChannel = NOISE
+                for heardDevice in heardDevices:
+                    statuses[heardDevice.number] = '*'
+        else:
+            self.rxChannel = None
+        self.rxStatus = ' '.join('%d%s' % (number, status) for (number, status) in enumerate(statuses) if status)
 
     def processTX(self):
         if self.nTickInSlot == 0: # If 0 gets skipped because of uneven time speed, transmission will be skipped.
@@ -206,7 +230,7 @@ class Device(object): # pylint: disable=R0902
         self.tranceiverUsage = float(self.txCount + self.rxCount) / self.tickCount
         if self.txPacket != self.oldTxPacket:
             self.oldTxPacket = self.txPacket
-            self.logger.info("TX: %s" % self.txPacket) # ToDo: improve filtering, make this debug, move logical logging to TestDevice?
+            self.logger.debug("TX: %s" % self.txPacket) # ToDo: improve filtering, make this debug, move logical logging to TestDevice?
 
     def processRX(self):
         if not self.listening():
@@ -234,7 +258,10 @@ class Device(object): # pylint: disable=R0902
     def doRX(self, what):
         assert what
         self.rxPacket = self.rxCounter = None
-        self.logger.info("RX: %s" % what)
+        if what in (NOISE, OK):
+            self.logger.debug("RX: %s // %s" % (what, self.rxStatus))
+        else:
+            self.logger.info("RX: %s // %s" % (what, self.rxStatus))
         self.rx(what)
 
     def prepare(self):

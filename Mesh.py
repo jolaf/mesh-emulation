@@ -3,7 +3,7 @@
 #import inspect_shell
 #
 
-from logging import getLogger, setLoggerClass, FileHandler, Formatter, StreamHandler, DEBUG
+from logging import getLogger, setLoggerClass, FileHandler, Formatter, StreamHandler, INFO
 from random import seed
 from sys import argv
 from time import time
@@ -86,7 +86,7 @@ class TimeSpeedSlider(SpeedSlider):
 class MoveSpeedSlider(SpeedSlider):
     minValue = -7
     maxValue = 7
-    defaultValue = 7 # ToDo 0
+    defaultValue = 0
     speeds = ((0, 'stop'),) + \
              tuple((1.0 / 2 ** i, '1/%d' % 2 ** i) for i in xrange(-minValue - 1, 0, -1)) + \
              tuple((2 ** i, str(2 ** i)) for i in xrange(0, maxValue + 1))
@@ -142,7 +142,7 @@ class Mesh(QMainWindow):
         fileHandler = FileHandler('mesh.log')
         fileHandler.setFormatter(formatter)
         rootLogger.addHandler(fileHandler)
-        rootLogger.setLevel(DEBUG)
+        rootLogger.setLevel(INFO)
         self.logger = getLogger('Mesh')
         self.logger.info("Start")
         # Configure devices
