@@ -25,7 +25,7 @@ class TestDevice(Device):
         self.states = [None,] * NUM_DEVICES
 
     def getStringTime(self):
-        return Device.getStringTime() + (' (%d:%d)' % (self.timeAuthor, self.timeAge)) if self.timeAuthor != None else ''
+        return Device.getStringTime(self) + (' (%d:%d)' % (self.timeAuthor, self.timeAge)) if self.timeAuthor != None else ''
 
     def adjustTime(self, packet):
         if packet:
