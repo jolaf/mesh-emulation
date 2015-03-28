@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>702</width>
-    <height>387</height>
+    <width>850</width>
+    <height>386</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
   </property>
   <widget class="QWidget" name="mainWidget">
-   <layout class="QHBoxLayout" name="mainLayout" stretch="0,1">
+   <layout class="QHBoxLayout" name="mainLayout" stretch="0,1,0,0,0">
     <property name="spacing">
      <number>10</number>
     </property>
@@ -427,7 +427,7 @@
      </layout>
     </item>
     <item>
-     <widget class="DevicesMapFrame" name="devicesMapFrame">
+     <widget class="DevicesGraphicsView" name="devicesGraphicsView">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
@@ -443,175 +443,157 @@
       <property name="statusTip">
        <string>Device map</string>
       </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: white</string>
-      </property>
       <property name="frameShape">
        <enum>QFrame::Box</enum>
       </property>
-      <widget class="QLabel" name="activeDeviceVisualSample">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>25</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: red; background-color: none; border: 1px solid red; border-radius: 5px</string>
-       </property>
-       <property name="text">
-        <string>•88</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="inactiveDeviceVisualSample">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>25</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: none; border: 1px solid none; border-radius: 5px</string>
-       </property>
-       <property name="text">
-        <string>•88</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="deviceTableViewChangedSample">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>41</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="palette">
-        <palette>
-         <active>
-          <colorrole role="WindowText">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Button">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Base">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Window">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </active>
-         <inactive>
-          <colorrole role="WindowText">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Button">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Base">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Window">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </inactive>
-         <disabled>
-          <colorrole role="WindowText">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>120</red>
-             <green>120</green>
-             <blue>120</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Button">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Base">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Window">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </disabled>
-        </palette>
-       </property>
-       <property name="text">
-        <string>changed</string>
-       </property>
-      </widget>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="deviceTableViewChangedSample">
+      <property name="palette">
+       <palette>
+        <active>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </active>
+        <inactive>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </inactive>
+        <disabled>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>120</red>
+            <green>120</green>
+            <blue>120</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </disabled>
+       </palette>
+      </property>
+      <property name="text">
+       <string>changed</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="inactiveDeviceVisualSample">
+      <property name="styleSheet">
+       <string notr="true">background-color: none; border: 1px solid none; border-radius: 5px</string>
+      </property>
+      <property name="text">
+       <string>•88</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="activeDeviceVisualSample">
+      <property name="styleSheet">
+       <string notr="true">color: red; background-color: none; border: 1px solid red; border-radius: 5px</string>
+      </property>
+      <property name="text">
+       <string>•88</string>
+      </property>
      </widget>
     </item>
    </layout>
@@ -621,7 +603,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>702</width>
+     <width>850</width>
      <height>21</height>
     </rect>
    </property>
@@ -730,12 +712,6 @@
    <header>MeshView</header>
   </customwidget>
   <customwidget>
-   <class>DevicesMapFrame</class>
-   <extends>QFrame</extends>
-   <header>MeshView</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>SeedLineEdit</class>
    <extends>QLineEdit</extends>
    <header>Mesh</header>
@@ -744,6 +720,11 @@
    <class>ResetButton</class>
    <extends>QPushButton</extends>
    <header>Mesh</header>
+  </customwidget>
+  <customwidget>
+   <class>DevicesGraphicsView</class>
+   <extends>QGraphicsView</extends>
+   <header>MeshView</header>
   </customwidget>
  </customwidgets>
  <tabstops>

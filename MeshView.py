@@ -1,6 +1,6 @@
 #!/usr/bin/python
-from PyQt4.QtCore import Qt, QAbstractTableModel, QVariant
-from PyQt4.QtGui import QAction, QFrame, QLabel, QPalette, QStyle
+from PyQt4.QtCore import Qt, QAbstractTableModel, QLineF, QVariant
+from PyQt4.QtGui import QAction, QColor, QGraphicsScene, QGraphicsView, QLabel, QPalette, QPixmap, QStyle
 from PyQt4.QtGui import QItemDelegate, QItemSelection, QItemSelectionModel, QSortFilterProxyModel, QTableView
 
 from MeshDevice import MAP_SIZE
@@ -139,8 +139,8 @@ class DevicesTableDelegate(QItemDelegate): # QStyledItemDelegate doesn't handle 
         QItemDelegate.drawFocus(self, painter, option, rect)
 
 class DevicesTableView(QTableView):
-    def configure(self, devicesModel, devicesMapFrame, changedDataSample):
-        self.devicesMapFrame = devicesMapFrame
+    def configure(self, devicesModel, devicesGraphicsView, changedDataSample):
+        self.devicesGraphicsView = devicesGraphicsView
         self.setModel(RoleDefaultSortProxyModel(devicesModel, RAW_ROLE))
         self.columnWidths = tuple(self.fontMetrics().boundingRect(column.longestValue).width() * FONT_METRICS_CORRECTION for column in devicesModel.columns)
         #for column in devicesModel.columns: # ToDo: Works for width but not for height, find current row height?
@@ -162,19 +162,19 @@ class DevicesTableView(QTableView):
     def selectionChanged(self, selected, deselected):
         QTableView.selectionChanged(self, selected, deselected)
         for row in (self.model().mapToSource(index).row() for index in deselected.indexes() if index.column() == 0):
-            self.devicesMapFrame.deactivate(row)
+            self.devicesGraphicsView.deactivate(row)
         for row in (self.model().mapToSource(index).row() for index in selected.indexes() if index.column() == 0):
-            self.devicesMapFrame.activate(row)
+            self.devicesGraphicsView.activate(row)
 
     def selectDevice(self, selection, active = True):
         self.selectionModel().select(self.model().mapSelectionFromSource(selection), QItemSelectionModel.Select if active else QItemSelectionModel.Deselect)
 
 class DeviceVisual(QLabel):
-    def __init__(self, device, viewSelection, activeSample, inactiveSample, mapFrame):
-        QLabel.__init__(self, inactiveSample.text()[0] + str(device.number), mapFrame)
+    def __init__(self, device, viewSelection, activeSample, inactiveSample, graphicsView):
+        QLabel.__init__(self, inactiveSample.text()[0] + str(device.number), graphicsView)
         self.device = device
         self.viewSelection = viewSelection
-        self.callback = mapFrame.mouseClicked
+        self.callback = graphicsView.mouseClicked
         self.activeStyleSheet = activeSample.styleSheet()
         self.inactiveStyleSheet = inactiveSample.styleSheet()
         self.deactivate()
@@ -195,7 +195,7 @@ class DeviceVisual(QLabel):
     def mousePressEvent(self, event):
         self.callback(self, event.modifiers())
 
-class DevicesMapFrame(QFrame):
+class DevicesGraphicsView(QGraphicsView):
     def configure(self, devices, deviceDistance, getSelection, selectDevice, activeDeviceVisualSample, inactiveDeviceVisualSample):
         self.deviceDistance = deviceDistance
         self.selectDevice = selectDevice
@@ -204,6 +204,9 @@ class DevicesMapFrame(QFrame):
         self.deviceVisuals = tuple(DeviceVisual(device, getSelection(device.number), activeDeviceVisualSample, inactiveDeviceVisualSample, self) for device in devices)
         self.oldWindowSize = None
         self.recalculate(self.width())
+        self.theScene = QGraphicsScene(self)
+        self.setScene(self.theScene)
+        self.radiationImage = QPixmap('images/radiation.png')
 
     def afterShow(self): # must be performed after show()
         for deviceVisual in self.deviceVisuals:
@@ -233,6 +236,9 @@ class DevicesMapFrame(QFrame):
     def refresh(self):
         for deviceVisual in self.deviceVisuals:
             deviceVisual.move(*(int(round(c * self.ppu + self.field - offset)) for (c, offset) in zip((deviceVisual.device.x, deviceVisual.device.y), self.offset)))
+        for deviceVisual in self.deviceVisuals:
+            for otherDevice in (self.deviceVisuals[device.number] for device in deviceVisual.device.heardDevices):
+                self.theScene.addLine(QLineF(deviceVisual.x(), deviceVisual.y(), otherDevice.x(), otherDevice.y()), QColor(0))
 
     def mouseClicked(self, deviceVisual, modifiers):
         if modifiers == Qt.NoModifier:

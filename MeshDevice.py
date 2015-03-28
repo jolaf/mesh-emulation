@@ -152,6 +152,7 @@ class Device(object): # pylint: disable=R0902
         self.txPacket = self.rxPacket = self.oldTxPacket = self.rxCounter = self.rxChannel = None
         self.txCount = self.rxCount = self.tickCount = 0
         self.txUsage = self.rxUsage = self.tranceiverUsage = 0
+        self.heardDevices = []
         self.setTarget()
 
     def setTarget(self):
@@ -185,26 +186,26 @@ class Device(object): # pylint: disable=R0902
         return self.txPacket in LISTENING
 
     def checkChannel(self):
-        heardDevices = []
+        self.heardDevices = []
         statuses = [None,] * NUM_DEVICES
         for relation in self.relations[self.number]:
             if relation and relation.chance:
                 other = relation.other(self)
                 if other.transmitting():
                     if random() < relation.chance:
-                        heardDevices.append(other)
+                        self.heardDevices.append(other)
                     else:
                         statuses[other.number] = '='
                 else:
                     statuses[other.number] = '_'
-        if heardDevices:
-            if len(heardDevices) == 1:
-                heardDevice = heardDevices[0]
+        if self.heardDevices:
+            if len(self.heardDevices) == 1:
+                heardDevice = self.heardDevices[0]
                 self.rxChannel = heardDevice.txPacket
                 statuses[heardDevice.number] = '+'
             else:
                 self.rxChannel = NOISE
-                for heardDevice in heardDevices:
+                for heardDevice in self.heardDevices:
                     statuses[heardDevice.number] = '*'
         else:
             self.rxChannel = None

@@ -150,10 +150,10 @@ class Mesh(QMainWindow):
         DeviceClass.configure(self.moveSpeedSlider.getSpeed, self)
         columns = tuple(Column(nColumn, *args) for (nColumn, args) in enumerate(COLUMNS_DATA))
         self.devicesModel = DevicesModel(DeviceClass.devices, columns, self)
-        self.devicesTableView.configure(self.devicesModel, self.devicesMapFrame, self.deviceTableViewChangedSample)
+        self.devicesTableView.configure(self.devicesModel, self.devicesGraphicsView, self.deviceTableViewChangedSample)
         for column in columns:
             ColumnAction(column, self.devicesTableView.setColumnHidden, self.columnsMenu)
-        self.devicesMapFrame.configure(DeviceClass.devices, lambda a, b: DeviceClass.relation(a, b).distance, self.devicesModel.getDeviceSelection, self.devicesTableView.selectDevice, self.activeDeviceVisualSample, self.inactiveDeviceVisualSample)
+        self.devicesGraphicsView.configure(DeviceClass.devices, lambda a, b: DeviceClass.relation(a, b).distance, self.devicesModel.getDeviceSelection, self.devicesTableView.selectDevice, self.activeDeviceVisualSample, self.inactiveDeviceVisualSample)
         for sample in (self.activeDeviceVisualSample, self.inactiveDeviceVisualSample, self.deviceTableViewChangedSample):
             sample.hide()
         # Starting up!
@@ -161,8 +161,8 @@ class Mesh(QMainWindow):
         self.pause()
         self.reset()
         self.show()
-        self.devicesMapFrame.afterShow() # must be performed after show()
-        self.resize(self.width() + self.leftLayout.geometry().height() - self.devicesMapFrame.width(), self.height())
+        self.devicesGraphicsView.afterShow() # must be performed after show()
+        self.resize(self.width() + self.leftLayout.geometry().height() - self.devicesGraphicsView.width(), self.height())
 
     def closeEvent(self, _event):
         self.logger.info("Close")
@@ -215,7 +215,7 @@ class Mesh(QMainWindow):
                 self.tick()
             self.skippingTo = None
             self.devicesModel.refresh()
-            self.devicesMapFrame.refresh()
+            self.devicesGraphicsView.refresh()
             if ticksToSkip > 1:
                 QApplication.restoreOverrideCursor()
 
@@ -243,7 +243,7 @@ class Mesh(QMainWindow):
         DeviceClass.fullTick()
         if self.playing or self.redrawWhileSkipping or firstTick:
             self.devicesModel.refresh(firstTick)
-            self.devicesMapFrame.refresh()
+            self.devicesGraphicsView.refresh()
         if self.playing:
             self.timer.singleShot(0, lambda: self.wait(True))
         elif self.redrawWhileSkipping:
