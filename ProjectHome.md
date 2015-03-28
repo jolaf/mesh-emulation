@@ -1,0 +1,1 @@
+This project is an attempt to emulate how self-organizing mesh network could work.
